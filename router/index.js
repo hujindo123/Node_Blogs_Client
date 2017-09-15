@@ -8,5 +8,6 @@ const Admin = require('../controller/admin/index')
 
 router.get('/getCaptchas', Captchas.getCaptchas)
 router.get('/register', Admin.register)
+router.get('/login', Admin.login)
 
 module.exports = router

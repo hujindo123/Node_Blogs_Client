@@ -1,6 +1,8 @@
 /**
  * Created by Administrator on 2017/8/29.
  */
+require('babel-core/register');
+require("babel-polyfill");
 const express = require('express');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');

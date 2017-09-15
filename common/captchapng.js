@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2017/9/13.
  */
-const captchapng = require('captchapng')
+import captchapng from 'captchapng'
 class Captchas {
   constructor () {
 
