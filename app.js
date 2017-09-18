@@ -26,11 +26,11 @@ app.use(router);
 
 
 /* 该中间件都会重新修改session的过期时间，从而达到预期的效果。 */
-app.use(function(req, res, next){
+/*app.use(function(req, res, next){
   req.session._garbage = Date();
   req.session.touch();
   next();
-});
+});*/
 
 /*app.use(session({
   secret: 'test',

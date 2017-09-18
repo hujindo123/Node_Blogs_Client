@@ -6,8 +6,8 @@ const router = express();
 const {query} = require('../../db/index');
 
 router.get('/', (req, res, next) => {
-  let usernname = req.query.title
-  let mysql = 'select* from'
+  let usernname = req.query.title;
+  let mysql = 'select* from';
   query(mysql, [usernname], (err, rows, fileds) => {
     if (err) {
       res.send(err)
