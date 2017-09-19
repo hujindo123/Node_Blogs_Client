@@ -30,7 +30,7 @@ class email {
                 this.email = email;
                 this.subject = '江湖邮件';
                 this.text = '找回密码';
-                this.html = `<h3><a href=http://172.16.0.61:8000/active?a=${this.account}&b=${this.randomString}>点击重置密码</a></h3>`;
+                this.html = `<h3><a href=http://172.16.0.61:8000/updatePass?a=${this.account}&b=${this.randomString}>点击重置密码</a></h3>`;
                 break;
         }
 // Generate test SMTP service account from ethereal.email

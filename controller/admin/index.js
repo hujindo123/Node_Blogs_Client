@@ -12,6 +12,7 @@ class Admin {
         this.login = this.login.bind(this);
         this.updateEmailCode = this.updateEmailCode.bind(this);
         this.findPass = this.findPass.bind(this);
+        this.updatePass = this.updatePass.bind(this);
     }
 
     async register(req, res, next) {
@@ -324,6 +325,54 @@ class Admin {
         }
 
     }
+
+    async updatePass(req, res, next) {
+        const {email, password, code} = {
+            email: req.query.email,
+            password: req.query.password,
+            code: req.query.code
+        };
+        try {
+            if (!password) {
+                throw new Error('参数错误');
+            } else if (!code) {
+                throw  new Error('参数错误');
+            }
+            let newmd5password = this.encryption(password);
+            let result = await UserModel.findUser(email, 0);
+            if (result) {
+                if (result[0].randomString === code.toString()) {
+                    if (await UserModel.updatePass(email, newmd5password)) {
+                        res.send({
+                            status: 200,
+                            type: 'SUCCESS_UPDATE',
+                            message: '成功'
+                        })
+                    }
+                } else {
+                    res.send({
+                        status: 0,
+                        type: 'ERROR_QUERY',
+                        message: '验证码和账号不匹配，请重新进入页面，并打开链接'
+                    })
+                }
+            } else {
+                res.send({
+                    status: 0,
+                    type: 'ERROR_QUERY',
+                    message: '用户不存在'
+                })
+            }
+        } catch (err) {
+            res.send({
+                status: 0,
+                type: 'ERROR_PARAMETER',
+                message: err.message
+            })
+            return
+        }
+
+    };
 
     encryption(password) {
         const newpassword = this.Md5(this.Md5(password).sub(2, 7) + this.Md5(password));

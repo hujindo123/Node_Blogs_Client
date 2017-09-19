@@ -8,8 +8,17 @@ class UserModel {
     }
 
     /* 查用户信息*/
-    findUser(account) {
-        let mysql = 'select * from user_interim where username=?';
+    findUser(account, status) {
+        var mysql;
+        switch (status) {
+            case 0:
+                mysql = 'select * from user_interim where email=?';
+                break;
+            default:
+                mysql = 'select * from user_interim where username=?';
+                break;
+        }
+        console.log(account)
         return new Promise((resolve, reject) => {
             query(mysql, [account], (err, val, fields) => {
                 if (!err) {
@@ -100,6 +109,20 @@ class UserModel {
                 }
             })
         });
+    };
+
+    /*修改密码*/
+    updatePass(account, pass) {
+        let mysql = 'update user_interim set password=? where username =?';
+        return new Promise((resolve, reject) => {
+            query(mysql, [pass, account], (err, val, fields) => {
+                if (err) {
+                    reject(err)
+                } else {
+                    resolve(true)
+                }
+            })
+        })
     };
 }
 module.exports = new UserModel();

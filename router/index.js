@@ -13,5 +13,6 @@ router.get('/login', Admin.login);
 router.get('/actives', Admin.activeAccount); // 激活账号
 router.get('/updateEmailCode', Admin.updateEmailCode); //再次发送邮箱激活码
 router.get('/findPass', Admin.findPass); // 邮箱查找密码
+router.get('/updatePass', Admin.updatePass); //修改密码
 
 module.exports = router;
