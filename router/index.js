@@ -6,10 +6,12 @@ const router = express.Router();
 const Captchas = require('../common/captchapng');
 const Admin = require('../controller/admin/index');
 
-router.get('/getCaptchas', Captchas.getCaptchas);
+router.get('/getCaptchas', Captchas.getCaptchas); // 生成验证码
 router.get('/register', Admin.register);
 router.get('/login', Admin.login);
-router.get('/sendEmail', Admin.sendEmail);
-router.get('/actives', Admin.activeAccount);
+//router.get('/sendEmail', Admin.sendEmail); // 发送邮件
+router.get('/actives', Admin.activeAccount); // 激活账号
+router.get('/updateEmailCode', Admin.updateEmailCode); //再次发送邮箱激活码
+router.get('/findPass', Admin.findPass); // 邮箱查找密码
 
 module.exports = router;

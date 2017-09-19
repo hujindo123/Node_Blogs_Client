@@ -9,7 +9,7 @@ class UserModel {
 
     /* 查用户信息*/
     findUser(account) {
-        let mysql = 'select * from user where username=?';
+        let mysql = 'select * from user_interim where username=?';
         return new Promise((resolve, reject) => {
             query(mysql, [account], (err, val, fields) => {
                 if (!err) {
@@ -20,6 +20,20 @@ class UserModel {
             })
         });
     };
+
+    /*检测邮箱是否存在*/
+    checkEmail(email) {
+        let mysql = 'select * from user_interim where email=?';
+        return new Promise((resolve, reject) => {
+            query(mysql, [email], (err, val, fields) => {
+                if (!err) {
+                    val.length > 0 ? resolve(val) : resolve(false);
+                } else {
+                    reject(err);
+                }
+            })
+        });
+    }
 
     /* 注册到临时表*/
     addUser(account, md5pssword, nickname, email, tokenTime, randomString) {
@@ -61,6 +75,31 @@ class UserModel {
                 }
             })
         })
+    };
+
+    /* 重新发送邮箱验证 激活账号 */
+    updateEmailCode(code, account, randomString) {
+        var mysql;
+        switch (code) {
+            case 0:
+                mysql = 'update user_interim set randomString=? where username =?';
+                break;
+            case 1:
+                mysql = 'update user_interim set randomString=? where email =?';
+                break;
+        }
+        return new Promise((resolve, reject) => {
+            query(mysql, [randomString, account], (err, val, fields) => {
+                if (!err) {
+                    resolve({
+                        account: account,
+                        randomString: randomString
+                    })
+                } else {
+                    reject(err);
+                }
+            })
+        });
     };
 }
 module.exports = new UserModel();

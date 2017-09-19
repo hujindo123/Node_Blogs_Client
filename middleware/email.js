@@ -4,10 +4,35 @@
 import nodemailer from 'nodemailer';
 class email {
     constructor() {
+        this.account = '';
+        this.randomString = '';
+        this.email = '';
 
+        this.subject = '';
+        this.text = '';
+        this.html = '';
     }
 
-    send() {
+    send(code, account, randomString, email) {
+        /* 0 激活重新发送邮箱验证码 */
+        switch (code) {
+            case 0:
+                this.account = account;
+                this.randomString = randomString;
+                this.email = email;
+                this.subject = '江湖邮件';
+                this.text = '激活账号';
+                this.html = `<h3><a href=http://172.16.0.61:8000/active?a=${this.account}&b=${this.randomString}>点击链接进入激活页面</a></h3>`;
+                break;
+            case 1:
+                this.account = account;
+                this.randomString = randomString;
+                this.email = email;
+                this.subject = '江湖邮件';
+                this.text = '找回密码';
+                this.html = `<h3><a href=http://172.16.0.61:8000/active?a=${this.account}&b=${this.randomString}>点击重置密码</a></h3>`;
+                break;
+        }
 // Generate test SMTP service account from ethereal.email
 // Only needed if you don't have a real mail account for testing
         return new Promise((resolve, reject) => {
@@ -26,10 +51,10 @@ class email {
                 // setup email data with unicode symbols
                 let mailOptions = {
                     from: '2623803589@qq.com', // sender address
-                    to: '2623803589@qq.com', // list of receivers
-                    subject: 'Hello ✔', // Subject line
-                    text: 'Hello world?', // plain text body
-                    html: '<b>Hello world?</b>' // html body
+                    to: this.email, // list of receivers
+                    subject: this.subject, // Subject line
+                    text: this.text, // plain text body
+                    html: this.html // html body
                 };
 
                 // send mail with defined transport object
