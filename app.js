@@ -4,6 +4,7 @@
 require('babel-core/register');
 require("babel-polyfill");
 const express = require('express');
+const bodyParser = require('body-parser');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 // const RedisStore = require('connect-redis')(session);//这是为了使Express和Redis两者能够后互相协调的工作，这个使得整个过程更加的容易
@@ -22,6 +23,10 @@ app.all('*', function (req, res, next) {
         next();
     }
 });
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+// parse application/json
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({
     resave: true,// 是指每次请求都重新设置session cookie，假设你的cookie是10分钟过期，每次请求都会再设置10分钟

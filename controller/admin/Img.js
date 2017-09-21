@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2017/9/21.
  */
-import request from 'request';
+//import request from 'request';
 import  qiniu from 'qiniu';
 class AA {
     constructor() {
