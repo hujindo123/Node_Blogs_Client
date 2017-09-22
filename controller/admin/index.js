@@ -136,7 +136,15 @@ class Admin {
                         type: 'ERROR_LOGIN',
                         message: '账号和密码不匹配'
                     })
+                } else if (!parseInt(queryPassword[0].status)) {
+                    res.send({
+                        status: 1,
+                        account: queryPassword[0].username,
+                        type: 'ERROR_LOGIN',
+                        message: '账号未激活'
+                    })
                 } else {
+                    req.session.userId = queryPassword[0].u_id;
                     res.send({
                         status: 200,
                         type: 'SUCCESS_LOGIN',

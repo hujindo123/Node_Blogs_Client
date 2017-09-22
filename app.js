@@ -24,7 +24,7 @@ app.all('*', function (req, res, next) {
     }
 });
 // parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 // parse application/json
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -42,12 +42,12 @@ app.use(router);
 
 /* 该中间件都会重新修改session的过期时间，从而达到预期的效果。 */
 /*
-app.use(function (req, res, next) {
-    req.session._garbage = Date();
-    req.session.touch();
-    next();
-});
-*/
+ app.use(function (req, res, next) {
+ req.session._garbage = Date();
+ req.session.touch();
+ next();
+ });
+ */
 
 /*app.use(session({
  secret: 'test',
