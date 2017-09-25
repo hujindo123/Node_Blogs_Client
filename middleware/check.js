@@ -2,12 +2,31 @@
  * Created by Administrator on 2017/9/6.
  */
 class Check {
-  constructor () {
+    constructor() {
 
-  };
+    };
 
-  async checkAdmin (req, res, next) {
-
-  };
+    async checkAdmin(req, res, next) {
+        const admin_id = req.session.userId;
+        const s_id = req.query.userId;
+        if (!admin_id || !Number(admin_id)) {
+            res.send({
+                status: -1,
+                type: 'ERROR_SESSION',
+                message: '亲，您还没有登录',
+            })
+            return
+        } else {
+            if (Number(s_id)!== admin_id) {
+                res.send({
+                    status: -1,
+                    type: 'HAS_NO_ACCESS',
+                    message: '权限不足',
+                })
+                return
+            }
+            next()
+        }
+    };
 }
-export default new Check()
+module.exports = new Check();

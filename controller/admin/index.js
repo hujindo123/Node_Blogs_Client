@@ -147,6 +147,7 @@ class Admin {
                     req.session.userId = queryPassword[0].u_id;
                     res.send({
                         status: 200,
+                        data: {userId: queryPassword[0].u_id},
                         type: 'SUCCESS_LOGIN',
                         message: '登录成功'
                     })

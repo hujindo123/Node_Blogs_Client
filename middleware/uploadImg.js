@@ -1,59 +1,72 @@
 import qiniu from 'qiniu'
 import formidable from 'formidable';
 import fs from 'fs';
+import UserModel from '../Model/User';
 qiniu.conf.ACCESS_KEY = 'm9BkY1-Tx10lFAtzbu8rlXt3FfC0LHsGSNqaByo6';
 qiniu.conf.SECRET_KEY = '3K-8B9PmFoO_ovB3z6Li_pU7BoIVUrYVzrIUl8rf';
 
 class uploadImg {
     constructor() {
         this.uploadHeader = this.uploadHeader.bind(this);
-        this.readFiles = this.readFiles.bind(this);
+        this.getToken = this.getToken.bind(this);
+        this.uploadFile = this.uploadFile.bind(this);
     }
 
     async uploadHeader(req, res, next) {
-        console.log(req.session.userId);
-        let dataBuffer = '';
-        const bucket = 'hujindong';
-        //要上传文件的本地路径
-        const form = formidable.IncomingForm();
-        await form.parse(req, (err, fields, files) => {
-            dataBuffer = new Buffer(fields.file, 'base64');
+        return new Promise((resolve, reject) => {
+            const bucket = 'hujindong';
+            //要上传文件的本地路径
+            const form = formidable.IncomingForm();
+            form.parse(req, async (err, fields, files) => {
+                //上传到七牛后保存的文件名
+                const key = (new Date().getTime() + Math.ceil(Math.random() * 10000)).toString(16) + req.session.userId;
+                const path = 'img/' + key + '.png'; //缓存到服务器的图片名和路径
+                //获取token
+                const token = await this.getToken(bucket, key);
+                await fs.writeFile(path, new Buffer(fields.file, 'base64'));
+                //上传文件
+                try {
+                    const qiniuImg = await this.uploadFile(token, key, path);
+                    await UserModel.uploadHeader(qiniuImg, req.session.userId);
+                    res.send({
+                        status: 0,
+                        type: 'UPLOAD_SUCCESS',
+                        message: '修改头像成功'
+                    })
+                } catch (err) {
+                    res.send({
+                        status: 0,
+                        type: 'UPLOAD_ERROR',
+                        message: err.message
+                    })
+                }
+            })
         });
-        this.readFiles(dataBuffer, bucket, req, res);
-        //要上传的空间
+
+
     }
 
-    readFiles(dataBuffer, bucket, req, res) {
-        try {
-            //上传到七牛后保存的文件名
-            let key = (new Date().getTime() + Math.ceil(Math.random() * 10000)).toString(16);
-            let path = 'img/' + key + '.png'; //缓存到服务器的图片名和路径
-            fs.writeFile(path, dataBuffer);
-            console.log('写入成功！');
-            //得到token
-            let putPolicy = new qiniu.rs.PutPolicy(bucket + ":" + key);
-            let token = putPolicy.token();
-            //上传文件
-            this.uploadFile(token, key, path, req, res);
-        } catch (err) {
-            console.log(err);
-        }
+    async getToken(bucket, key) {
+        //得到token
+        let putPolicy = new qiniu.rs.PutPolicy(bucket + ":" + key);
+        return await putPolicy.token();
     }
 
     //构造上传函数
-    uploadFile(uptoken, key, localFile, req, res) {
-        let extra = new qiniu.io.PutExtra();
-        qiniu.io.putFile(uptoken, key, localFile, extra, function (err, ret) {
-            if (!err) {
-                // 上传成功， 处理返回值
-                console.log(ret.hash, ret.key, ret.persistentId);
-                console.log(req.session.u_id);
+    uploadFile(uptoken, key, localFile) {
+        return new Promise((resolve, reject) => {
+            let extra = new qiniu.io.PutExtra();
+            qiniu.io.putFile(uptoken, key, localFile, extra, function (err, ret) {
                 fs.unlink(localFile); //清除服务器临时文件
-            } else {
-                // 上传失败， 处理返回代码
-                console.log(err);
-            }
+                if (!err) {
+                    resolve(ret.key)
+                } else {
+                    console.log('图片上传至七牛失败', err);
+                    reject(err)
+                }
+            });
         });
+
 
     }
 }
