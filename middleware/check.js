@@ -14,19 +14,18 @@ class Check {
                 status: -1,
                 type: 'ERROR_SESSION',
                 message: '亲，您还没有登录',
-            })
+            });
             return
-        } else {
-            if (Number(s_id)!== admin_id) {
-                res.send({
-                    status: -1,
-                    type: 'HAS_NO_ACCESS',
-                    message: '权限不足',
-                })
-                return
-            }
-            next()
+        } else if (Number(s_id) !== admin_id) {
+            res.send({
+                status: -1,
+                type: 'HAS_NO_ACCESS',
+                message: '权限不足',
+            });
+            return
         }
-    };
+        next()
+    }
+    ;
 }
 module.exports = new Check();

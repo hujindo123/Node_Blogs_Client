@@ -12,7 +12,7 @@ class userMessage {
         let result = await UserModel.findUser(userId, 1);
         try {
             res.send({
-                status: 0,
+                status: 200,
                 type: 'QUERY_SUCCSEE',
                 data: {
                     username: result[0].username,
