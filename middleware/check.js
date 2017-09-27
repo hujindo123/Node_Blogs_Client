@@ -8,7 +8,7 @@ class Check {
 
     async checkAdmin(req, res, next) {
         const admin_id = req.session.userId;
-        const s_id = req.query.userId;
+        const s_id = req.query.userId || req.body.userId;
         if (!admin_id || !Number(admin_id)) {
             res.send({
                 status: -1,

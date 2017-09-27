@@ -16,8 +16,9 @@ router.get('/actives', Admin.activeAccount); // 激活账号
 router.get('/updateEmailCode', Admin.updateEmailCode); //再次发送邮箱激活码
 router.get('/findPass', Admin.findPass); // 邮箱查找密码
 router.get('/updatePass', Admin.updatePass); //修改密码
-router.post('/updateImg', check.checkAdmin, uploadImg.uploadHeader); // 更新头像
-router.get('/getUserMessage', check.checkAdmin, userMessage.getUserMessage)
+router.post('/updateImg', uploadImg.uploadHeader); // 更新头像
+router.get('/getUserMessage', check.checkAdmin, userMessage.getUserMessage); //获取用户所有信息
+router.get('/updateUserMessage', check.checkAdmin, userMessage.updateUserMessage); //修改用户信息
 
 
 module.exports = router;

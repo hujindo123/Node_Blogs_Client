@@ -18,14 +18,22 @@ class uploadImg {
             //要上传文件的本地路径
             const form = formidable.IncomingForm();
             form.parse(req, async (err, fields, files) => {
-                //上传到七牛后保存的文件名
-                const key = (new Date().getTime() + Math.ceil(Math.random() * 10000)).toString(16) + req.session.userId;
-                const path = 'img/' + key + '.png'; //缓存到服务器的图片名和路径
-                //获取token
-                const token = await this.getToken(bucket, key);
-                await fs.writeFile(path, new Buffer(fields.file, 'base64'));
-                //上传文件
                 try {
+                    if(Number(fields.userId) !== req.session.userId){
+                        res.send({
+                            status: -1,
+                            type: 'ERROR_SESSION',
+                            message: '亲，您还没有登录',
+                        });
+                        return
+                    }
+                    //上传到七牛后保存的文件名
+                    const key = (new Date().getTime() + Math.ceil(Math.random() * 10000)).toString(16) + req.session.userId;
+                    const path = 'img/' + key + '.png'; //缓存到服务器的图片名和路径
+                    //获取token
+                    const token = await this.getToken(bucket, key);
+                    await fs.writeFile(path, new Buffer(fields.file, 'base64'));
+                    //上传文件
                     const qiniuImg = await this.uploadFile(token, key, path);
                     await UserModel.uploadHeader(qiniuImg, req.session.userId);
                     res.send({

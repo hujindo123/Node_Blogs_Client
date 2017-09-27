@@ -2,10 +2,9 @@
  * Created by Administrator on 2017/9/15.
  */
 import {query} from '../db/index';
+import Check from '../middleware/check';
 class UserModel {
-    constructor() {
-
-    }
+    constructor() {}
 
     /* 查用户信息*/
     findUser(account, status) {
@@ -140,5 +139,19 @@ class UserModel {
             })
         });
     };
+
+    /*修改用户资料*/
+    updateUserMessage(nickname, sex, birthday, province, city, area, id) {
+        return new Promise((resolve, rejected) => {
+            let mysql = 'update user_interim set nickname=?,sex=?, birthday=?, province=?, city=?, area=? where u_id=?';
+            query(mysql, [nickname, sex, birthday, province, city, area, id], (err, val, fields) => {
+                if (err) {
+                    rejected(err)
+                } else {
+                    resolve(val)
+                }
+            });
+        })
+    }
 }
 module.exports = new UserModel();
