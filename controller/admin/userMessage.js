@@ -23,6 +23,7 @@ class userMessage {
                     nickname: result[0].nickname,
                     sex: result[0].sex,
                     birthday: result[0].birthday,
+                    header:  result[0].header,
                     province: result[0].province,
                     city: result[0].city,
                     area: result[0].area

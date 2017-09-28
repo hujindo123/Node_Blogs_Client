@@ -145,10 +145,14 @@ class Admin {
                     })
                 } else {
                     req.session.userId = queryPassword[0].u_id;
+                    const result = await UserModel.findUser(req.session.userId, 1);
                     res.send({
                         status: 200,
-                        data: {userId: queryPassword[0].u_id},
                         type: 'SUCCESS_LOGIN',
+                        data: {
+                            userId: queryPassword[0].u_id,
+                            header:  result[0].header,
+                        },
                         message: '登录成功'
                     })
                 }
