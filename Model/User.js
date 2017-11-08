@@ -21,11 +21,11 @@ class UserModel {
                     mysql = 'select * from user_interim where username=?';
                     break;
             }
-            query(mysql, [account], (err, val, fields) => {
+            query(mysql, [account], async (err, val, fields) => {
                 if (!err) {
-                    val.length > 0 ? resolve(val) : resolve(false);
+                   await val.length > 0 ? resolve(val) : resolve(false);
                 } else {
-                    reject(err);
+                   await reject(err);
                 }
             })
         });
@@ -88,23 +88,12 @@ class UserModel {
     };
 
     /* 重新发送邮箱验证 激活账号 */
-    updateEmailCode(code, account, randomString) {
+    updateEmailCode(email, randomString) {
         return new Promise((resolve, reject) => {
-            var mysql;
-            switch (code) {
-                case 0:
-                    mysql = 'update user_interim set randomString=? where username =?';
-                    break;
-                case 1:
-                    mysql = 'update user_interim set randomString=? where email =?';
-                    break;
-            }
-            query(mysql, [randomString, account], (err, val, fields) => {
+            let mysql ='update user_interim set randomString=? where email =?';
+            query(mysql, [randomString, email], (err, val, fields) => {
                 if (!err) {
-                    resolve({
-                        account: account,
-                        randomString: randomString
-                    })
+                    resolve(true);
                 } else {
                     reject(err);
                 }
@@ -154,4 +143,4 @@ class UserModel {
         })
     }
 }
-module.exports = new UserModel();
+module.exports =  new UserModel();

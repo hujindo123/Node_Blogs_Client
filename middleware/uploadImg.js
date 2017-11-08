@@ -36,12 +36,15 @@ class uploadImg {
                     //查找是否有头像 有头像则更新头像 删除七牛储存
                     let result = await UserModel.findUser(req.session.userId, 1);
                     // 删除图片
-                    if (result[0].header.length > 0) {
-                        console.log(result[0].header.length > 0)
+                   /* if (result[0].header.length > 0) {
+                        console.log(bucket);
+                        console.log(result[0].header);
                         await this.deleteQiNiu(bucket, result[0].header);
-                    }
+                    }*/
                     //上传文件
+                    console.log('abc');
                     const qiniuImg = await this.uploadFile(token, key, path);
+                    console.log(qiniuImg);
                     await UserModel.uploadHeader(qiniuImg, req.session.userId);
                     res.send({
                         status: 0,

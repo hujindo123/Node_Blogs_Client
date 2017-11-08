@@ -9,6 +9,7 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 // const RedisStore = require('connect-redis')(session);//这是为了使Express和Redis两者能够后互相协调的工作，这个使得整个过程更加的容易
 const app = express();
+const history =  require('connect-history-api-fallback');
 const router = require('./router/index');
 
 app.all('*', function (req, res, next) {
@@ -39,7 +40,11 @@ app.use(session({
 }));
 
 app.use(router);
-
+app.use(history({
+    rewrites: [
+        { from: /\/soccer/, to: '/'}
+    ]
+}));
 /* 该中间件都会重新修改session的过期时间，从而达到预期的效果。 */
 /*
  app.use(function (req, res, next) {
@@ -69,3 +74,12 @@ app.listen(port, () => {
     console.log(`server is run ${port}`);
 });
 module.exports = app;
+/*
+* status
+* 100 参数错误
+* 200 返回成功
+* 0  未登录 cookie失效
+* 500 服务器错误
+* 300未激活
+* -1 查询失败
+* */

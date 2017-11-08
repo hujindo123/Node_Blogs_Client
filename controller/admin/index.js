@@ -2,9 +2,9 @@
  * Created by Administrator on 2017/9/6.
  */
 /* const formidable = require('formidable') */
-import crypto from 'crypto';
-import sendEmail from '../../middleware/email'
-import UserModel from '../../Model/User';
+import crypto from "crypto";
+import sendEmail from "../../middleware/email";
+import UserModel from "../../Model/User";
 class Admin {
     constructor() {
         this.register = this.register.bind(this);
@@ -49,7 +49,7 @@ class Admin {
         } catch (err) {
             console.log('登录参数错误', err);
             res.send({
-                status: 500,
+                status: 100,
                 type: 'ERROR_QUERY',
                 message: err.message
             });
@@ -57,7 +57,7 @@ class Admin {
         }
         if (cap.toString() !== validCode.toString()) {
             res.send({
-                status: 0,
+                status: -1,
                 type: 'ERROR_CAPTCHA',
                 message: '验证码不正确'
             });
@@ -66,20 +66,26 @@ class Admin {
         const md5pssword = this.encryption(password);
         try {
             let user = await UserModel.findUser(account);
-            let checkEmail = await UserModel.checkEmail(email); //保证邮箱的唯一性
             if (user) {
                 res.send({
-                    status: 0,
+                    status: -1,
                     type: 'ERROR_USER_EXIST',
                     message: '用户名已存在'
                 });
                 return
             } else {
-                if (!checkEmail) {
+                let checkEmail = await UserModel.checkEmail(email); //保证邮箱的唯一性
+                if (checkEmail) {
+                    res.send({
+                        status: -1,
+                        type: 'ERROR_USER_EXIST',
+                        message: '邮箱已被注册'
+                    });
+                    return
+                } else {
                     let addUser = await UserModel.addUser(account, md5pssword, nickname, email, tokenTime, randomString);
                     if (addUser) {
                         /*发送验证邮箱*/
-                        await sendEmail.send(0, account, randomString, email);
                         res.send({
                             status: 200,
                             type: 'SUCCESS_REGISTER',
@@ -87,14 +93,10 @@ class Admin {
                             data: {
                                 account: account
                             }
-                        })
+                        });
+                        //0 代表邮箱激活 1 代表找回密码
+                        sendEmail.send(0, account, randomString, email);
                     }
-                } else {
-                    res.send({
-                        status: 0,
-                        type: 'ERROR_USER_EXIST',
-                        message: '邮箱已被注册'
-                    });
                 }
             }
         } catch (err) {
@@ -120,48 +122,51 @@ class Admin {
         } catch (err) {
             console.log('登录参数错误', err);
             res.send({
-                status: 0,
+                status: 100,
                 type: 'ERROR_QUERY',
                 message: err.message
-            })
+            });
             return
         }
-        const newmd5password = this.encryption(password);
-        let queryPassword = await UserModel.findUser(account);
         try {
-            if (queryPassword.length > 0) { // jn4MfPsyjnClxJvn62Zqcg==
+            const newmd5password = this.encryption(password);
+            let queryPassword = await UserModel.findUser(account);
+            if (queryPassword) {
                 if (newmd5password.toString() !== queryPassword[0].password.toString()) {
                     res.send({
-                        status: 0,
+                        status: -1,
                         type: 'ERROR_LOGIN',
                         message: '账号和密码不匹配'
-                    })
-                } else if (!parseInt(queryPassword[0].status)) {
+                    });
+                    return;
+                }
+                else if (!parseInt(queryPassword[0].status)) {
                     res.send({
-                        status: 1,
+                        status: 300,
                         account: queryPassword[0].username,
                         type: 'ERROR_LOGIN',
                         message: '账号未激活'
                     })
-                } else {
+                    return;
+                }
+                else {
                     req.session.userId = queryPassword[0].u_id;
-                    const result = await UserModel.findUser(req.session.userId, 1);
                     res.send({
                         status: 200,
                         type: 'SUCCESS_LOGIN',
                         data: {
                             userId: queryPassword[0].u_id,
-                            header:  result[0].header,
+                            header: queryPassword[0].header,
                         },
                         message: '登录成功'
-                    })
+                    });
                 }
             } else {
                 res.send({
-                    status: 0,
+                    status: -1,
                     type: 'ERROR_LOGIN',
                     message: '账号不存在'
-                })
+                });
             }
         } catch (err) {
             res.send({
@@ -240,7 +245,8 @@ class Admin {
             if (!account) {
                 throw new Error('参数错误')
             }
-        } catch (err) {
+        }
+        catch (err) {
             res.send({
                 status: 500,
                 type: 'ERROR_QUERY',
@@ -251,28 +257,36 @@ class Admin {
         let user = await UserModel.findUser(account);
         if (!user) {
             res.send({
-                status: 0,
+                status: -1,
                 type: 'ERROR_USER_NOT_SEXIST',
                 message: '用户名不存在'
             });
             return
-        } else {
+        }
+        else if (!user[0].status) {
             try {
-                let result = await UserModel.updateEmailCode(0, user[0].username, this.randomString());
+                let result = await UserModel.updateEmailCode(user[0].email, this.randomString());
                 if (result) {
-                    await sendEmail.send(0, result.account, result.randomString, user[0].email);
-                    res.send({
-                        status: 200,
-                        message: '发送成功'
-                    })
+                    let rs = await UserModel.findUser(user[0].username);
+                    await sendEmail.send(0, rs[0].username, rs[0].randomString, rs[0].email);
+                    await console.log(123);
                 }
-            } catch (err) {
+            }
+            catch (error) {
                 res.send({
                     status: 0,
                     type: 'ERROR_USER',
-                    message: err
+                    message: error
                 })
             }
+        }
+        else {
+            res.send({
+                status: -1,
+                type: 'ERROR_HAS_SEXIST',
+                message: '用户账号已激活，请直接登录'
+            });
+            return
         }
     };
 
