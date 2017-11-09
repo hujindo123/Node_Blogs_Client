@@ -22,7 +22,7 @@ class email {
                 this.email = email;
                 this.subject = '江湖邮件';
                 this.text = '激活账号';
-                this.html = `<h3><a href=http://172.16.0.61:8000/active?a=${this.account}&b=${this.randomString}>点击链接进入激活页面</a></h3>`;
+                this.html = `<h3><a href=http://172.16.0.61:8000/active/${this.email}/${this.randomString}>点击链接进入激活页面</a></h3>`;
                 break;
             case 1:
                 this.account = account;
@@ -30,7 +30,7 @@ class email {
                 this.email = email;
                 this.subject = '江湖邮件';
                 this.text = '找回密码';
-                this.html = `<h3><a href=http://172.16.0.61:8000/updatePass?a=${this.account}&b=${this.randomString}>点击重置密码</a></h3>`;
+                this.html = `<h3><a href=http://172.16.0.61:8000/updatePass/${this.email}/${this.randomString}>点击重置密码</a></h3>`;
                 break;
         }
         return new Promise((resolve, reject) => {
@@ -55,6 +55,8 @@ class email {
                 transporter.sendMail(mailOptions, (error, info) => {
                     if (error) {
                         reject(error.response);
+                    }else {
+                        resolve(info);
                     }
                 });
             });

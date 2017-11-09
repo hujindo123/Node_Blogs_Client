@@ -1,15 +1,15 @@
 /**
  * Created by Administrator on 2017/9/15.
  */
-import {query} from '../db/index';
-import Check from '../middleware/check';
+import {query} from "../db/index";
 class UserModel {
-    constructor() {}
+    constructor() {
+    }
 
     /* 查用户信息*/
     findUser(account, status) {
         return new Promise((resolve, reject) => {
-            var mysql;
+            let mysql;
             switch (status) {
                 case 0:
                     mysql = 'select * from user_interim where email=?';
@@ -21,29 +21,15 @@ class UserModel {
                     mysql = 'select * from user_interim where username=?';
                     break;
             }
-            query(mysql, [account], async (err, val, fields) => {
+            query(mysql, [account], (err, val, fields) => {
                 if (!err) {
-                   await val.length > 0 ? resolve(val) : resolve(false);
-                } else {
-                   await reject(err);
-                }
-            })
-        });
-    };
-
-    /*检测邮箱是否存在*/
-    checkEmail(email) {
-        return new Promise((resolve, reject) => {
-            let mysql = 'select * from user_interim where email=?';
-            query(mysql, [email], (err, val, fields) => {
-                if (!err) {
-                    val.length > 0 ? resolve(val) : resolve(false);
+                    resolve(val);
                 } else {
                     reject(err);
                 }
             })
         });
-    }
+    };
 
     /* 注册到临时表*/
     addUser(account, md5pssword, nickname, email, tokenTime, randomString) {
@@ -57,20 +43,6 @@ class UserModel {
                 }
             })
         });
-    };
-
-    /*查询激活*/
-    queryAccount(account, code) {
-        return new Promise((resolve, reject) => {
-            let mysql = 'select randomString,status from user_interim where username=?';
-            query(mysql, [account], (err, val, fields) => {
-                if (!err) {
-                    val.length > 0 ? resolve(val) : resolve('该账户不存在');
-                } else {
-                    reject(err);
-                }
-            })
-        })
     };
 
     /*更新激活*/
@@ -90,7 +62,7 @@ class UserModel {
     /* 重新发送邮箱验证 激活账号 */
     updateEmailCode(email, randomString) {
         return new Promise((resolve, reject) => {
-            let mysql ='update user_interim set randomString=? where email =?';
+            let mysql = 'update user_interim set randomString=? where email =?';
             query(mysql, [randomString, email], (err, val, fields) => {
                 if (!err) {
                     resolve(true);
@@ -143,4 +115,4 @@ class UserModel {
         })
     }
 }
-module.exports =  new UserModel();
+module.exports = new UserModel();
