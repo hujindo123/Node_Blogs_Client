@@ -16,16 +16,6 @@ class Admin {
     }
 
     async register(req, res, next) {
-        let cap = req.cookies.cap;
-        if (!cap) {
-            console.log('验证码失效');
-            res.send({
-                status: 0,
-                type: 'ERROR_CAPTCHA',
-                message: '验证码失效'
-            });
-            return
-        }
         const {account, nickname, email, password, validCode, tokenTime, randomString} =
             {
                 account: req.query.account,
@@ -37,7 +27,9 @@ class Admin {
                 randomString: this.randomString()
             };
         try {
-            if (!account) {
+            if (!req.cookies.cap) {
+                throw new Error('验证码失效，请点击刷新');
+            } else if (!account) {
                 throw new Error('账号参数错误')
             } else if (!nickname) {
                 throw new Error('昵称参数错误')
@@ -47,13 +39,11 @@ class Admin {
                 throw  new Error('验证码参数错误')
             }
         } catch (err) {
-            console.log('登录参数错误', err);
             res.send({
                 status: 100,
                 type: 'ERROR_QUERY',
                 message: err.message
             });
-            return
         }
         if (cap.toString() !== validCode.toString()) {
             res.send({
@@ -71,7 +61,7 @@ class Admin {
             } else {
                 let checkEmail = await UserModel.findUser(email, 0); //保证邮箱的唯一性
                 if (checkEmail.length > 0) {
-                    throw new Error('用户名已存在');
+                    throw new Error('邮箱已被注册');
                 } else {
                     await UserModel.addUser(account, md5pssword, nickname, email, tokenTime, randomString);
                     /*发送验证邮箱*/
@@ -94,7 +84,6 @@ class Admin {
                 message: err.message
             })
         }
-
     };
 
     async login(req, res, next) {
@@ -137,6 +126,7 @@ class Admin {
                     });
                     return;
                 } else {
+                    req.session.userId = queryPassword[0].u_id;
                     res.send({
                         status: 200,
                         type: 'SUCCESS_LOGIN',
@@ -146,7 +136,6 @@ class Admin {
                         },
                         message: '登录成功'
                     });
-                    req.session.userId = queryPassword[0].u_id;
                 }
             } else {
                 throw new Error('账号不存在');
@@ -161,12 +150,12 @@ class Admin {
     };
 
     async activeAccount(req, res, next) {
-        const {account, code} = {
-            account: req.query.account,
+        const {email, code} = {
+            email: req.query.email,
             code: req.query.code
         };
         try {
-            if (!account) {
+            if (!email) {
                 throw new Error('参数错误');
             } else if (!code) {
                 throw  new Error('参数错误');
@@ -180,13 +169,13 @@ class Admin {
             return
         }
         try {
-            let result = await UserModel.findUser(account, -1);
+            let result = await UserModel.findUser(email, 0);
             if (result[0].randomString.toString() !== code) {
                 throw new Error('验证码错误');
             } else if (result[0].status) {
                 throw new Error('账号已激活,请登录');
             } else if (!result.status && result[0].randomString.toString() === code) {
-                await UserModel.updateStatus(account);
+                await UserModel.updateStatus(result[0].username);
                 res.send({
                     status: 200,
                     code: 2,
