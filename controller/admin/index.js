@@ -18,9 +18,9 @@ class Admin {
     async register(req, res, next) {
         const {account, nickname, email, password, validCode, tokenTime, randomString} =
             {
-                account: req.query.account,
+                account:  req.query.account,
                 nickname: req.query.nickname,
-                email: req.query.email,
+                email:    req.query.email,
                 password: req.query.password,
                 validCode: req.query.validCode,
                 tokenTime: new Date().getTime() + 60 * 60 * 24, //过期时间
@@ -87,10 +87,7 @@ class Admin {
     };
 
     async login(req, res, next) {
-        const {account, password} = {
-            account: req.query.account,
-            password: req.query.password
-        };
+        const {account, password} = req.query;
         try {
             if (!account)
                 throw new Error('参数错误');
@@ -106,9 +103,9 @@ class Admin {
             });
             return
         }
-        const newmd5password = this.encryption(password);
-        let queryPassword = await UserModel.findUser(account);
         try {
+            const newmd5password = this.encryption(password);
+            let queryPassword = await UserModel.findUser(account);
             if (queryPassword.length > 0) {
                 if (newmd5password.toString() !== queryPassword[0].password.toString()) {
                     res.send({
@@ -126,7 +123,7 @@ class Admin {
                     });
                     return;
                 } else {
-                    req.session.userId = queryPassword[0].u_id;
+                    req.session.userId =  queryPassword[0].u_id;
                     res.send({
                         status: 200,
                         type: 'SUCCESS_LOGIN',

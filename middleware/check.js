@@ -7,9 +7,10 @@ class Check {
     };
 
     async checkAdmin(req, res, next) {
+        console.log(1);
         const admin_id = req.session.userId;
         const s_id = req.query.userId || req.body.userId;
-        console.log(req);
+        //console.log(req);
         if (!admin_id || !Number(admin_id)) {
             res.send({
                 status: 0,
