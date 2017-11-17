@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2017/9/25.
  */
-import UserModel from '../../Model/User';
+import UserModel from "../../Model/User";
 
 class userMessage {
     constructor() {
@@ -23,7 +23,7 @@ class userMessage {
                     nickname: result[0].nickname,
                     sex: result[0].sex,
                     birthday: result[0].birthday,
-                    header:  result[0].header,
+                    header: result[0].header,
                     province: result[0].province,
                     city: result[0].city,
                     area: result[0].area
@@ -41,14 +41,7 @@ class userMessage {
     /*修改用户信息*/
     async updateUserMessage(req, res, next) {
         try {
-            const {nickname, sex, birthday, province, city, area} = {
-                nickname: req.query.nickname,
-                sex: req.query.sex,
-                birthday: req.query.birthday,
-                province: req.query.province,
-                city: req.query.city,
-                area: req.query.area
-            };
+            const {nickname, sex, birthday, province, city, area} = req.query;
             if (!nickname) {
                 throw new Error('昵称参数错误');
             } else if (!sex) {
