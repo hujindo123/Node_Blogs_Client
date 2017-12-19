@@ -70,5 +70,4 @@ class userMessage {
         }
     };
 }
-
-module.exports = new userMessage();
+export default new userMessage();

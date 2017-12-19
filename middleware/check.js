@@ -1,6 +1,7 @@
 /**
  * Created by Administrator on 2017/9/6.
  */
+'use strict';
 class Check {
     constructor() {
 
@@ -29,4 +30,5 @@ class Check {
     }
     ;
 }
-module.exports = new Check();
+export default new Check();
+//module.exports = new Check();

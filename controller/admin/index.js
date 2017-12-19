@@ -93,8 +93,7 @@ class Admin {
                 throw new Error('参数错误');
             else if (!password)
                 throw  new Error('参数错误');
-        }
-        catch (err) {
+        } catch (err) {
             console.log('登录参数错误', err);
             res.send({
                 status: 100,
@@ -123,7 +122,6 @@ class Admin {
                     });
                     return;
                 } else {
-                    req.session.userId =  queryPassword[0].u_id;
                     res.send({
                         status: 200,
                         type: 'SUCCESS_LOGIN',
