@@ -8,6 +8,7 @@ class Check {
     };
 
     async checkAdmin(req, res, next) {
+        console.log(req.session.userId);
         const admin_id = req.session.userId;
         const s_id = req.query.userId || req.body.userId;
         //console.log(req);
@@ -30,5 +31,5 @@ class Check {
     }
     ;
 }
-export default new Check();
-//module.exports = new Check();
+//export default new Check();
+module.exports = new Check();

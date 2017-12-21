@@ -19,14 +19,14 @@ class uploadImg {
             const form = new formidable.IncomingForm();
             form.parse(req, async (err, fields, files) => {
                 try {
-                    /* if (Number(fields.userId) !== req.session.userId) {
-                     res.send({
-                     status: -1,
-                     type: 'ERROR_SESSION',
-                     message: '亲，您还没有登录',
-                     });
-                     return
-                     }*/
+                    if (Number(fields.userId) !== Number(fields.userId)) {
+                        res.send({
+                            status: -1,
+                            type: 'ERROR_SESSION',
+                            message: '亲，您还没有登录',
+                        });
+                        return
+                    }
                     //上传到七牛后保存的文件名
                     const key = (new Date().getTime() + Math.ceil(Math.random() * 10000)).toString(16) + 0;
                     const path = 'img/' + key + '.png'; //缓存到服务器的图片名和路径
