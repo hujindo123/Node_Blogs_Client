@@ -3,10 +3,10 @@
  */
 const mysql = require('mysql')
 const pool = mysql.createPool({
-    host: '47.93.236.234',
+    host: 'localhost',
     user: 'root',
-    password: 'hujindong',
-    database: 'blogs',
+    password: 'root',
+    database: 'blog',
     port: 3306
 })
 function query(sql, param, callback) {

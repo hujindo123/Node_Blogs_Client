@@ -7,7 +7,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-// const RedisStore = require('connect-redis')(session);//这是为了使Express和Redis两者能够后互相协调的工作，这个使得整个过程更加的容易
+const RedisStore = require('connect-redis')(session);//这是为了使Express和Redis两者能够后互相协调的工作，这个使得整个过程更加的容易
 const app = express();
 const history =  require('connect-history-api-fallback');
 const router = require('./router/index');
@@ -26,42 +26,23 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({
-    secret: '1234567890QWERTY', //与cookieParser中的一致
-    cookie: {
-        maxAge: 1000 * 60 * 60 // default session expiration is set to 1 hour
-    },
-    resave: false,// 是指每次请求都重新设置session cookie，假设你的cookie是10分钟过期，每次请求都会再设置10分钟
-    saveUninitialized: true, //是指无论有没有session cookie，每次请求都设置个session cookie ，默认给个标示为 connect.sid
-    //secure: 应用在https
+    resave: true, //是指每次请求都重新设置session cookie，假设你的cookie是10分钟过期，每次请求都会再设置10分钟
+    saveUninitialized: false, //无论是否有cookie  session 默认给个标示为 connect.sid
+    secure:false,//为true时时https or http
+    cookie: {maxAge: 600 * 1000},
+    secret: 'recommand 128 bytes random strin',
+    store: new RedisStore({
+        host: '127.0.0.1',
+        port: 6379,
+        db: 0
+    })
 }));
-
 app.use(router);
 app.use(history({
     rewrites: [
         { from: /\/soccer/, to: '/'}
     ]
 }));
-/* 该中间件都会重新修改session的过期时间，从而达到预期的效果。 */
-/*
- app.use(function (req, res, next) {
- req.session._garbage = Date();
- req.session.touch();
- next();
- });
- */
-
-/*app.use(session({
- secret: 'test',
- resave: false,
- saveUninitialized: true,
- cookie:{
- maxAge: 1000*60*60 // default session expiration is set to 1 hour
- },
- store: new MemcachedStore({
- hosts: ['127.0.0.1:9000'],
- prefix: 'test_'
- })
- }));*/
 
 app.use(express.static('./public'));
 const port = process.env.port || 3001;
