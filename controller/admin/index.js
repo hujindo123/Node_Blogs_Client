@@ -27,6 +27,7 @@ class Admin {
                 randomString: this.randomString()
             };
         try {
+            console.log(req.session.cookie);
             if (!req.cookies.cap) {
                 throw new Error('验证码失效，请点击刷新');
             } else if (!account) {
@@ -44,8 +45,9 @@ class Admin {
                 type: 'ERROR_QUERY',
                 message: err.message
             });
+            return
         }
-        if (cap.toString() !== validCode.toString()) {
+        if (req.cookies.cap !== validCode.toString()) {
             res.send({
                 status: -1,
                 type: 'ERROR_CAPTCHA',
