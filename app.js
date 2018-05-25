@@ -29,7 +29,7 @@ app.use(session({
     resave: true, //是指每次请求都重新设置session cookie，假设你的cookie是10分钟过期，每次请求都会再设置10分钟
     saveUninitialized: false, //无论是否有cookie  session 默认给个标示为 connect.sid
     secure: false,//为true时时https or http
-    cookie: {maxAge: 60 * 60 * 24 * 30},
+    cookie: {maxAge: 60 },
     secret: 'recommand 128 bytes random strin',
     store: new RedisStore({
         host: '127.0.0.1',

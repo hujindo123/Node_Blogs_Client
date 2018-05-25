@@ -5,6 +5,7 @@
 import crypto from "crypto";
 import sendEmail from "../../middleware/email";
 import UserModel from "../../Model/User";
+
 class Admin {
     constructor() {
         this.register = this.register.bind(this);
@@ -15,19 +16,23 @@ class Admin {
         this.updatePass = this.updatePass.bind(this);
     }
 
+    /**
+     * 注册
+     */
     async register(req, res, next) {
-        const {account, nickname, email, password, validCode, tokenTime, randomString} =
+        const {account, nickname, email, password, validCode, createTime, activeStatus, randomCode} =
             {
-                account:  req.query.account,
+                account: req.query.account,
                 nickname: req.query.nickname,
-                email:    req.query.email,
+                email: req.query.email,
                 password: req.query.password,
                 validCode: req.query.validCode,
-                tokenTime: new Date().getTime() + 60 * 60 * 24, //过期时间
-                randomString: this.randomString()
+                createTime: new Date().getTime(),
+                activeStatus: 0,
+                randomCode: this.randomString()
+
             };
         try {
-            console.log(req.session.cookie);
             if (!req.cookies.cap) {
                 throw new Error('验证码失效，请点击刷新');
             } else if (!account) {
@@ -55,8 +60,10 @@ class Admin {
             });
             return
         }
-        const md5pssword = this.encryption(password);
         try {
+            /**
+             * 查找用户名是否注册
+             */
             let user = await UserModel.findUser(account);
             if (user.length > 0) {
                 throw new Error('用户名已存在');
@@ -65,8 +72,11 @@ class Admin {
                 if (checkEmail.length > 0) {
                     throw new Error('邮箱已被注册');
                 } else {
-                    await UserModel.addUser(account, md5pssword, nickname, email, tokenTime, randomString);
-                    /*发送验证邮箱*/
+                    const md5pssword = this.encryption(password);
+                    /**
+                     * 添加用户
+                     */
+                    await UserModel.addUser(account, md5pssword, nickname, email, createTime, activeStatus, randomCode);
                     res.send({
                         status: 200,
                         type: 'SUCCESS_REGISTER',
@@ -75,8 +85,11 @@ class Admin {
                             account: account
                         }
                     });
-                    //0 代表邮箱激活 1 代表找回密码
-                    sendEmail.send(0, account, randomString, email);
+                    /**
+                     * 发送验证邮箱
+                     * 0 代表邮箱激活 1 代表找回密码
+                     */
+                    sendEmail.send(0, account, randomCode, email);
                 }
             }
         } catch (err) {
@@ -106,24 +119,47 @@ class Admin {
         }
         try {
             const newmd5password = this.encryption(password);
+            /**
+             * 账号密码是否匹配
+             */
             let queryPassword = await UserModel.findUser(account);
             if (queryPassword.length > 0) {
-                if (newmd5password.toString() !== queryPassword[0].password.toString()) {
+                if (newmd5password !== this.encryption(queryPassword[0].password)) {
                     res.send({
                         status: -1,
                         type: 'ERROR_LOGIN',
                         message: '账号和密码不匹配'
                     });
                     return;
-                } else if (!parseInt(queryPassword[0].status)) {
-                    res.send({
-                        status: 300,
-                        account: queryPassword[0].username,
-                        type: 'ERROR_LOGIN',
-                        message: '账号未激活'
-                    });
-                    return;
-                } else {
+                    /**
+                     * 查看验证码是否过期
+                     */
+                } else if (parseInt(queryPassword[0].create_time) + (24 * 60 * 60 * 1000) > parseInt(new Date().getTime())) {
+                    if(queryPassword[0].active_status === 0 ){
+                        res.send({
+                            status: 300,
+                            account: queryPassword[0].account,
+                            type: 'ERROR_LOGIN',
+                            message: '账号未激活'
+                        });
+                        return;
+                    }else {
+                        if(queryPassword[0].active_status !== 1){
+                            /**
+                             * 改变 激活状态 -1 过期激活码
+                             */
+                            res.send({
+                                status: 300,
+                                account: queryPassword[0].account,
+                                type: 'ERROR_LOGIN',
+                                message: '激活码失效，登录重新获取'
+                            });
+                            UserModel.updateStatus(account, -1);
+                            return;
+                        }
+                    }
+
+                }  else {
                     req.session.userId = queryPassword[0].u_id;
                     res.send({
                         status: 200,
@@ -173,7 +209,7 @@ class Admin {
             } else if (result[0].status) {
                 throw new Error('账号已激活,请登录');
             } else if (!result.status && result[0].randomString.toString() === code) {
-                await UserModel.updateStatus(result[0].username);
+                await UserModel.updateStatus(result[0].account, 1);
                 res.send({
                     status: 200,
                     code: 2,
@@ -209,8 +245,8 @@ class Admin {
                 /* 没有被激活 */
                 if (!user[0].status) {
                     await UserModel.updateEmailCode(user[0].email, this.randomString());
-                    let rs = await UserModel.findUser(user[0].username);
-                    await sendEmail.send(0, rs[0].username, rs[0].randomString, rs[0].email);
+                    let rs = await UserModel.findUser(user[0].account);
+                    await sendEmail.send(0, rs[0].account, rs[0].randomString, rs[0].email);
                     res.send({
                         status: 200,
                         type: 'ok',
@@ -269,7 +305,7 @@ class Admin {
             if (checkEmail.length > 0) {
                 await UserModel.updateEmailCode(email, this.randomString()); //更新下随机码
                 let rs = await UserModel.findUser(email, 0); //更新了随机码 再次查询一次
-                await sendEmail.send(1, rs[0].username, rs[0].randomString, email);
+                await sendEmail.send(1, rs[0].account, rs[0].randomString, email);
                 res.send({
                     status: 200,
                     message: '发送成功,请前往邮箱激活'
@@ -349,4 +385,5 @@ class Admin {
         return pwd;
     }
 }
+
 module.exports = new Admin();

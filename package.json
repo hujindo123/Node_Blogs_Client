@@ -6,7 +6,11 @@
   "dependencies": {
     "connect-history-api-fallback": "^1.4.0",
     "express": "^4.15.4",
-    "express-session": "^1.15.4"
+    "express-session": "^1.15.4",
+    "moment": "^2.22.1",
+    "node-formdata": "^0.1.8",
+    "querystring": "^0.2.0",
+    "restler": "^3.4.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

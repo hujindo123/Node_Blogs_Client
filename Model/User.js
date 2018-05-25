@@ -2,6 +2,7 @@
  * Created by Administrator on 2017/9/15.
  */
 import {query} from "../db/index";
+
 class UserModel {
     constructor() {
     }
@@ -18,7 +19,7 @@ class UserModel {
                     mysql = 'select * from user where u_id=?';
                     break;
                 default:
-                    mysql = 'select * from user where user_name=?';
+                    mysql = 'select * from user where account=?';
                     break;
             }
             query(mysql, [account], (err, val, fields) => {
@@ -31,11 +32,11 @@ class UserModel {
         });
     };
 
-    /* 注册到临时表*/
-    addUser(account, md5pssword, nickname, email, tokenTime, randomString) {
+    /* 注册到用户表*/
+    addUser(account, md5pssword, nickname, email, createtime, activeStatus, randomCode) {
         return new Promise((resolve, reject) => {
-            let mysql = 'insert into user(username, password,nickname,email,token_exptime,randomString) values(?,?,?,?,?,?)';
-            query(mysql, [account, md5pssword, nickname, email, tokenTime, randomString], (err, val, fields) => {
+            let mysql = 'insert into user(account, pass_word,nick_name,email,create_time,active_status,random_code) values(?,?,?,?,?,?,?)';
+            query(mysql, [account, md5pssword, nickname, email, createtime, activeStatus, randomCode], (err, val, fields) => {
                 if (!err) {
                     resolve(true)
                 } else {
@@ -45,11 +46,11 @@ class UserModel {
         });
     };
 
-    /*更新激活*/
-    updateStatus(account) {
+    /*激活状态更改*/
+    updateStatus(account,status) {
         return new Promise((resolve, reject) => {
-            let mysql = 'update user set status=? where username =?';
-            query(mysql, [1, account], (err, val, fields) => {
+            let mysql = 'update user set active_status=? where account =?';
+            query(mysql, [status, account], (err, val, fields) => {
                 if (err) {
                     reject(err)
                 } else {
@@ -76,7 +77,7 @@ class UserModel {
     /*修改密码*/
     updatePass(account, pass) {
         return new Promise((resolve, reject) => {
-            let mysql = 'update user set password=? where username =?';
+            let mysql = 'update user set password=? where account =?';
             query(mysql, [pass, account], (err, val, fields) => {
                 if (err) {
                     reject(err)
@@ -115,4 +116,5 @@ class UserModel {
         })
     }
 }
+
 module.exports = new UserModel();

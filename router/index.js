@@ -7,8 +7,9 @@ import check from '../middleware/check';
 const Captchas = require('../common/captchapng');
 const Admin = require('../controller/admin/index');
 const uploadImg = require('../middleware/uploadImg');
-
+const test = require('../controller/admin/test');
 const router = express.Router();
+router.get('/testSend', test.testSend); // 测试
 router.get('/getCaptchas', Captchas.getCaptchas); // 生成验证码
 router.get('/register', Admin.register);
 router.get('/login', Admin.login);
